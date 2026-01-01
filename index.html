@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tuk Rush - Ultimate Night</title>
+    <title>Tuk Rush - Final Polish</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
     
@@ -11,7 +11,6 @@
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Noto Sans Sinhala', sans-serif; touch-action: none; user-select: none; }
         .font-tech { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
         
-        /* Mirror Styling */
         .mirror-frame {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
             width: 160px; height: 70px;
@@ -26,11 +25,11 @@
             pointer-events: none;
         }
         
-        /* Side Warning Notification (Top Right) */
+        /* Side Warning */
         #warning-container {
             position: absolute; top: 90px; right: 0; 
             display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
-            pointer-events: none; overflow: hidden; padding-right: 10px;
+            pointer-events: none; overflow: hidden; padding-right: 10px; z-index: 40;
         }
         .bus-alert {
             background: linear-gradient(90deg, #800080, #ff00ff);
@@ -44,36 +43,58 @@
         @keyframes slideIn { to { transform: translateX(0); } }
         @keyframes pulseWarn { from { text-shadow: 0 0 5px white; } to { text-shadow: 0 0 20px yellow; } }
 
-        .danger-overlay { animation: flashRed 0.5s infinite; pointer-events: none; }
-        @keyframes flashRed { 0%, 100% { box-shadow: inset 0 0 0 red; } 50% { box-shadow: inset 0 0 80px red; } }
+        /* FIXED SPEECH BUBBLES */
+        #shout-container {
+            position: absolute; inset: 0; pointer-events: none; z-index: 45; overflow: hidden;
+        }
+        .shout-bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9); /* Slight transparency */
+            color: black;
+            padding: 8px 15px; border-radius: 12px;
+            border: 3px solid black;
+            font-weight: 900; font-size: 1rem;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            animation: popUp 0.3s ease-out;
+            white-space: nowrap;
+        }
+        .shout-player {
+            background: #FFEB3B; color: #D50000; border-color: #D50000;
+            left: 50%; bottom: 35%; /* Moved Higher up */
+            transform: translateX(-50%);
+            font-size: 1.2rem; text-shadow: 1px 1px 0px white;
+            z-index: 60;
+        }
+        @keyframes popUp { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .leaderboard-row:nth-child(1) { color: #FFD700; font-weight: 900; border: 1px solid gold; } 
+        .leaderboard-row:nth-child(2) { color: #C0C0C0; font-weight: 800; } 
+        .leaderboard-row:nth-child(3) { color: #CD7F32; font-weight: 800; }
         
-        .rules-list li { margin-bottom: 6px; font-size: 0.85rem; color: #ddd; text-align: left; display: flex; align-items: start; gap: 6px; }
-        .rules-list span { color: #FACC15; font-weight: bold; white-space: nowrap; }
+        .shake { animation: shake 0.5s; border-color: red !important; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
 
     <div id="game-container" class="absolute inset-0 z-0"></div>
+    <div id="shout-container"></div>
 
     <div id="game-ui" class="absolute inset-0 z-10 hidden flex-col justify-between p-4 pointer-events-none">
-        
         <div class="flex justify-between items-start w-full pointer-events-auto mt-1 relative">
             <div class="bg-gray-800/80 backdrop-blur border-l-4 border-yellow-500 px-4 py-2 rounded-r-xl shadow-lg">
                 <p class="text-[10px] text-gray-400 font-bold uppercase">SCORE</p>
                 <p id="score-display" class="text-2xl font-black font-tech text-yellow-400">0</p>
             </div>
-
             <div class="mirror-frame" id="mirror-box">
                 <div class="mirror-glass"></div>
                 <div id="mirror-alert" class="absolute inset-0 border-4 border-red-600 hidden animate-pulse"></div>
             </div>
-
             <div class="bg-gray-800/80 backdrop-blur border-r-4 border-blue-500 px-4 py-2 rounded-l-xl shadow-lg">
                 <p class="text-[10px] text-gray-400 font-bold uppercase text-right">PICKUPS</p>
                 <p id="passenger-count" class="text-2xl font-black text-right font-tech text-blue-400">0</p>
             </div>
         </div>
-
         <div id="warning-container"></div>
     </div>
 
@@ -82,66 +103,241 @@
             TUK<br><span class="text-white">RUSH</span>
         </h1>
         
-        <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 max-w-sm w-full mb-6 shadow-2xl text-left">
-            <h3 class="text-white font-bold text-lg mb-3 border-b border-gray-600 pb-2">🚦 ගේම් එකේ නීති:</h3>
-            <ul class="rules-list pl-1">
-                <li><span>👀 කන්නාඩිය:</span> පස්සෙන් එන "හෙලගෝ" ටුක් එක බලන්න.</li>
-                <li><span>🙋‍♂️ මගීන්:</span> මගීන්ව ගත්තම Boost වෙනවා.</li>
-                <li><span>🚌 පිස්සු බස්:</span> ලකුණු 150 පැන්නම "මාර සෙනග", "කැලේ රජා" වගේ පිස්සු බස් එනවා. අයින් වෙන්න!</li>
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 max-w-sm w-full mb-4 shadow-2xl text-left">
+            <h3 class="text-white font-bold text-lg mb-2 border-b border-gray-600 pb-2">🚦 ගේම් එකේ නීති:</h3>
+            <ul class="rules-list pl-1 text-sm text-gray-300">
+                <li>👀 කන්නාඩියෙන් පස්ස බලන්න.</li>
+                <li>🙋‍♂️ මගීන් ගත්තම Helago ඈත් වෙනවා.</li>
+                <li>🏆 එක නමකින් එක High Score එකයි.</li>
             </ul>
         </div>
         
         <div class="w-full max-w-xs space-y-3">
-            <input type="text" id="player-name" placeholder="ඔයාගේ නම" maxlength="12"
-                   class="w-full px-4 py-3 rounded-xl bg-gray-900 border-2 border-gray-600 text-white text-center font-bold outline-none focus:border-yellow-500 transition-colors">
+            <p id="welcome-msg" class="text-green-400 text-sm font-bold hidden">ආයේ ආවද මචං? එළ!</p>
+            <div class="relative">
+                <input type="text" id="player-name" placeholder="ඔයාගේ නම" maxlength="12"
+                       class="w-full px-4 py-3 rounded-xl bg-gray-900 border-2 border-gray-600 text-white text-center font-bold outline-none focus:border-yellow-500 transition-colors">
+                <p id="name-error" class="text-red-500 text-xs font-bold mt-1 hidden">නම පාවිච්චි කරලා! මේක ගන්න:</p>
+                <button id="suggestion-btn" class="hidden bg-blue-600 text-white text-xs px-2 py-1 rounded mt-1 mx-auto">Suggested Name</button>
+            </div>
             
-            <button onclick="startGame()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xl py-4 rounded-xl shadow-lg transform active:scale-95 transition font-tech">
-                START RACE ▶
+            <button id="start-btn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xl py-4 rounded-xl shadow-lg transform active:scale-95 transition font-tech flex justify-center items-center gap-2">
+                <span id="btn-text">START RACE ▶</span>
+                <span id="btn-loader" class="hidden w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+            </button>
+            
+            <button onclick="toggleGarage()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2">
+                <span>🛒</span> Garage / Shop
             </button>
         </div>
     </div>
 
-    <div id="game-over-screen" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md p-6 text-center">
-        <h2 class="text-6xl font-black text-red-600 mb-2 italic font-tech">WASTED!</h2>
-        <div class="bg-gray-900 p-6 rounded-2xl w-full max-w-sm border border-gray-800 shadow-2xl mb-6">
-            <p class="text-xs text-gray-500 uppercase mb-1">Your Rank</p>
-            <h3 id="funny-badge" class="text-2xl font-black text-yellow-400 mb-4 animate-pulse">???</h3>
-            <div class="flex justify-between text-sm text-gray-400 border-t border-gray-800 pt-4">
-                <span>Total Score:</span>
-                <span id="final-score" class="font-bold text-white text-xl">0</span>
+    <div id="garage-modal" class="hidden absolute inset-0 z-40 bg-black/95 flex flex-col items-center justify-center p-6">
+        <h2 class="text-3xl text-yellow-400 font-black mb-4 font-tech">GARAGE</h2>
+        <p class="text-gray-400 mb-4">Total Pickups: <span id="total-coins" class="text-white font-bold">0</span></p>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="selectColor(0xDC2626, 0)" class="p-4 bg-red-600 rounded-xl border-2 border-white hover:opacity-80">Red (Free)</button>
+            <button onclick="selectColor(0x2563EB, 50)" class="p-4 bg-blue-600 rounded-xl border-2 border-gray-600 hover:opacity-80">Blue (50 Pickups)</button>
+            <button onclick="selectColor(0x10B981, 100)" class="p-4 bg-green-500 rounded-xl border-2 border-gray-600 hover:opacity-80">Neon Green (100)</button>
+            <button onclick="selectColor(0xFFD700, 200)" class="p-4 bg-yellow-500 rounded-xl border-2 border-gray-600 hover:opacity-80">Golden (200)</button>
+        </div>
+        <button onclick="toggleGarage()" class="bg-gray-600 px-8 py-3 rounded-xl font-bold text-white">CLOSE ❌</button>
+    </div>
+
+    <div id="game-over-screen" class="hidden absolute inset-0 z-30 flex flex-col bg-black/95 backdrop-blur-md p-4 overflow-hidden">
+        
+        <div class="flex-grow flex flex-col items-center justify-center overflow-y-auto py-4">
+            <h2 class="text-5xl font-black text-red-600 mb-2 italic font-tech mt-4">WASTED!</h2>
+            
+            <div class="bg-gray-900 p-4 rounded-2xl w-full max-w-sm border border-gray-800 shadow-2xl mb-4 shrink-0">
+                <p class="text-xs text-gray-500 uppercase mb-1">Your Rank</p>
+                <h3 id="funny-badge" class="text-xl font-black text-yellow-400 mb-2 animate-pulse">???</h3>
+                <div class="flex justify-between text-sm text-gray-400 border-t border-gray-800 pt-2">
+                    <span>Score:</span>
+                    <span id="final-score" class="font-bold text-white text-xl">0</span>
+                </div>
+                <p id="upload-status" class="text-xs text-blue-400 mt-1 animate-pulse">Checking Database...</p>
+            </div>
+
+            <div class="bg-gray-800 w-full max-w-sm rounded-xl p-3 mb-2 border border-gray-700 shrink-0">
+                <h4 class="text-yellow-400 font-bold text-sm uppercase mb-2 border-b border-gray-600 pb-1">🏆 Top Legends</h4>
+                <div id="leaderboard-list" class="flex flex-col gap-1 text-sm max-h-32 overflow-y-auto">
+                    <p class="text-gray-500 text-xs">Loading...</p>
+                </div>
             </div>
         </div>
-        <div class="flex flex-col gap-3 w-full max-w-sm">
-            <button onclick="shareScore()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg transform hover:scale-105 transition flex items-center justify-center gap-2">
-                <span>📲</span> යාලුවන්ටත් කියමු මචෝ
+
+        <div class="w-full max-w-sm mx-auto flex flex-col gap-2 pb-4 pt-2 bg-black/0 z-50">
+            <button onclick="shareScore()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm">
+                <span>📲</span> යාලුවන්ටත් කියමු
             </button>
-            <button onclick="window.location.reload()" class="bg-white hover:bg-gray-200 text-black font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                <span>🔄</span> ආපහු යමු (Try Again)
+            <a href="https://www.facebook.com/share/1DLZicSmUT/" target="_blank" class="bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 no-underline text-sm">
+                <span>👍</span> Page එක ෆලෝ කරන්න
+            </a>
+            <button onclick="window.location.reload()" class="bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm">
+                <span>🔄</span> ආපහු යමු
             </button>
         </div>
     </div>
 
-    <div id="danger-overlay" class="absolute inset-0 pointer-events-none hidden danger-overlay"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCvOJzCLi4VsQr9IaoHtDlNZ2uo6Vtm0ZA",
+            authDomain: "tuktuk-b1020.firebaseapp.com",
+            projectId: "tuktuk-b1020",
+            storageBucket: "tuktuk-b1020.firebasestorage.app",
+            messagingSenderId: "864257502086",
+            appId: "1:864257502086:web:f1123aa3b3ed02f17e9a07",
+            measurementId: "G-6KFBYXV89B"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const FUNNY_NAMES = ["කැවුම් රජා", "පිස්සු පූසා", "බඩ මහතා", "කොස් මාමා", "ටුක් කාපුවා", "සයිලන්සර්", "වක්කඩ", "ඇම්ඩන්"];
+        const startBtn = document.getElementById('start-btn');
+        const nameInput = document.getElementById('player-name');
+        const errorMsg = document.getElementById('name-error');
+        const suggestBtn = document.getElementById('suggestion-btn');
+        
+        const savedName = localStorage.getItem('tukPlayerName');
+        if (savedName) {
+            nameInput.value = savedName;
+            document.getElementById('welcome-msg').classList.remove('hidden');
+        }
+
+        suggestBtn.addEventListener('click', () => {
+            nameInput.value = suggestBtn.innerText;
+            errorMsg.classList.add('hidden');
+            suggestBtn.classList.add('hidden');
+            nameInput.classList.remove('shake');
+        });
+
+        startBtn.addEventListener('click', async () => {
+            const inputName = nameInput.value.trim();
+            if(!inputName) { alert("නමක් දාපන් බං!"); return; }
+
+            document.getElementById('btn-text').classList.add('hidden');
+            document.getElementById('btn-loader').classList.remove('hidden');
+
+            if(inputName === localStorage.getItem('tukPlayerName')) {
+                startGameSuccess(inputName);
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "scores", inputName);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    document.getElementById('btn-text').classList.remove('hidden');
+                    document.getElementById('btn-loader').classList.add('hidden');
+                    const randName = FUNNY_NAMES[Math.floor(Math.random() * FUNNY_NAMES.length)] + "_" + Math.floor(Math.random()*100);
+                    errorMsg.innerText = "ඒ නම වෙන එකෙක් අරන්! මේක ගමුද?";
+                    errorMsg.classList.remove('hidden');
+                    suggestBtn.innerText = randName;
+                    suggestBtn.classList.remove('hidden');
+                    nameInput.classList.add('shake');
+                    setTimeout(()=>nameInput.classList.remove('shake'), 500);
+                } else {
+                    localStorage.setItem('tukPlayerName', inputName);
+                    startGameSuccess(inputName);
+                }
+            } catch(e) {
+                console.error("Connection error", e);
+                localStorage.setItem('tukPlayerName', inputName);
+                startGameSuccess(inputName);
+            }
+        });
+
+        function startGameSuccess(name) { window.startGameInternal(); }
+
+        window.saveScoreToDB = async (name, score) => {
+            const status = document.getElementById('upload-status');
+            try {
+                const docRef = doc(db, "scores", name);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const currentDBScore = docSnap.data().score;
+                    if (score > currentDBScore) {
+                        await updateDoc(docRef, { score: Math.floor(score), date: new Date() });
+                        status.innerText = "New High Score Saved! 🚀";
+                    } else { status.innerText = `High Score Remains: ${currentDBScore} 🔒`; }
+                } else {
+                    await setDoc(docRef, { name: name, score: Math.floor(score), date: new Date() });
+                    status.innerText = "Score Saved! ✅";
+                }
+                status.classList.add('text-green-400');
+                window.loadLeaderboard(); 
+            } catch (e) { status.innerText = "Error Saving (Check Internet) ❌"; status.classList.add('text-red-400'); }
+        };
+
+        window.loadLeaderboard = async () => {
+            const listDiv = document.getElementById('leaderboard-list');
+            listDiv.innerHTML = '<p class="text-gray-500 text-xs">Updating...</p>';
+            try {
+                const q = query(collection(db, "scores"), orderBy("score", "desc"), limit(5));
+                const querySnapshot = await getDocs(q);
+                listDiv.innerHTML = ""; 
+                let rank = 1;
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // FIX: Use data.name explicitly, fall back to doc.id only if empty
+                    const displayName = data.name ? data.name : doc.id;
+                    const row = document.createElement('div');
+                    row.className = 'flex justify-between items-center leaderboard-row bg-gray-900/50 p-1 rounded px-2';
+                    row.innerHTML = `<span>#${rank} ${displayName.substring(0,12)}</span> <span>${data.score}</span>`;
+                    listDiv.appendChild(row);
+                    rank++;
+                });
+                if(rank === 1) listDiv.innerHTML = '<p class="text-gray-500 text-xs">No scores yet.</p>';
+            } catch (e) { listDiv.innerHTML = '<p class="text-red-500 text-xs">Failed to load scores.</p>'; }
+        };
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        const CONFIG = { laneWidth: 14, startSpeed: 0.6, maxGap: 30, enemySpeed: 0.02 };
-        
-        // FUNNY BUS NAMES LIST
-        const BUS_NAMES = [
-            "මාර සෙනග", "කැලේ රජා", "හෝල්ට් නෑ", "කුඩු එක්ස්ප්‍රස්", 
-            "නයිට් රයිඩර්", "අවතාරේ", "සොනික්", "Road Killer", 
-            "මාර දූතයා", "Jet Liner", "Air Bus", "Flying Fish"
-        ];
+        const CONFIG = { laneWidth: 14, startSpeed: 0.6, maxGap: 30, enemySpeed: 0.012 };
+        const BUS_NAMES = ["මාර සෙනග", "කැලේ රජා", "හෝල්ට් නෑ", "කුඩු එක්ස්ප්‍රස්", "නයිට් රයිඩර්", "අවතාරේ", "සොනික්"];
+        const BUS_SHOUTS = ["අඩෝ අයින් කරපන්!", "පාර මගේ යකෝ!", "ඔහොම යමන්!", "තෝ කොහෙද යන්නේ?", "පලයන් අයින් වෙලා!", "මගෙන් කන්නද හදන්නේ?"];
+        const CRASH_SHOUTS = ["අයියෝ සල්ලි!", "කොහෙද යකෝ ගියේ!", "වාහනේ ඉවරයි!", "අම්මෝ!", "කෙල වුනා නේද?", "සොරි ඩොට් කොම්"];
 
-        let state = {
-            isPlaying: false, score: 0, passengers: 0, gap: 20, 
-            speedMultiplier: 1.0, frame: 0, playerName: "Rider", entities: []
+        let state = { 
+            isPlaying: false, score: 0, passengers: 0, gap: 20, speedMultiplier: 1.0, 
+            frame: 0, playerName: "Rider", entities: [], 
+            playerColor: parseInt(localStorage.getItem('tukColor')) || 0xDC2626 
         };
         let animationId;
 
-        // Three.js Setup
+        // --- UPDATED VISUAL SHOUTS POSITION ---
+        function showVisualShout(text, type) {
+            const container = document.getElementById('shout-container');
+            const bubble = document.createElement('div');
+            bubble.className = `shout-bubble ${type === 'player' ? 'shout-player' : ''}`;
+            bubble.innerText = text;
+            
+            if (type !== 'player') {
+                // Enemy shouts appear HIGH UP (Sky area) or FAR SIDES to avoid blocking road
+                // Randomly decide: Top area or Sides
+                if(Math.random() > 0.5) {
+                    bubble.style.top = Math.random() * 20 + 5 + '%'; // 5% to 25% from top
+                    bubble.style.left = Math.random() * 60 + 20 + '%';
+                } else {
+                    bubble.style.top = Math.random() * 40 + 20 + '%'; 
+                    // Far left or Far right
+                    bubble.style.left = Math.random() > 0.5 ? '10%' : '80%';
+                }
+                bubble.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+            }
+
+            container.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 2000); 
+        }
+
         const scene = new THREE.Scene(); scene.background = new THREE.Color(0x050505); scene.fog = new THREE.Fog(0x050505, 10, 100);
         const mainCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         mainCamera.position.set(0, 6, 14); mainCamera.lookAt(0, 0, -10);
@@ -159,67 +355,39 @@
         const headLight = new THREE.SpotLight(0xffffaa, 1.8); headLight.position.set(0, 3, -1); headLight.target.position.set(0, 0, -30);
         headLight.angle = 0.6; headLight.penumbra = 0.5; headLight.castShadow = true; scene.add(headLight); scene.add(headLight.target);
 
-        // Helper: Create Box
         function createBox(w, h, d, color, x, y, z, parent) {
-            const geo = new THREE.BoxGeometry(w, h, d);
-            const mat = new THREE.MeshStandardMaterial({ color: color });
-            const mesh = new THREE.Mesh(geo, mat); mesh.position.set(x, y, z); mesh.castShadow = true;
-            if(parent) parent.add(mesh); return mesh;
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: color }));
+            mesh.position.set(x, y, z); mesh.castShadow = true; if(parent) parent.add(mesh); return mesh;
         }
 
-        // Helper: Text Texture for Bus Names
         function createNameTexture(name) {
-            const cvs = document.createElement('canvas'); cvs.width = 256; cvs.height = 64;
-            const ctx = cvs.getContext('2d');
-            // Transparent background
-            ctx.fillStyle = "rgba(0,0,0,0)"; ctx.fillRect(0,0,256,64);
-            // Text Style
-            ctx.shadowColor = "black"; ctx.shadowBlur = 4;
-            ctx.fillStyle = "#FFD700"; // Gold color
-            ctx.font = "bold 30px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText(name, 128, 32);
+            const cvs = document.createElement('canvas'); cvs.width=256; cvs.height=64;
+            const ctx = cvs.getContext('2d'); ctx.fillStyle="rgba(0,0,0,0)"; ctx.fillRect(0,0,256,64);
+            ctx.shadowColor="black"; ctx.shadowBlur=4; ctx.fillStyle="#FFD700"; ctx.font="bold 30px Arial"; 
+            ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(name, 128, 32);
             return new THREE.CanvasTexture(cvs);
         }
 
-        // --- Create Private Bus with Name ---
         function createPrivateBus() {
             const group = new THREE.Group();
-            const colors = [0x8A2BE2, 0x0000FF, 0xFF1493, 0x00FF00];
-            const col = colors[Math.floor(Math.random() * colors.length)];
-            
-            // Bus Body
+            const col = [0x8A2BE2, 0x0000FF, 0xFF1493, 0x00FF00][Math.floor(Math.random()*4)];
             createBox(3.4, 3.8, 10, col, 0, 1.9, 0, group);
             const win = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.5, 8), new THREE.MeshStandardMaterial({color:0x000000}));
             win.position.set(0, 2.5, 0); group.add(win);
-
-            // Blinking Lights
+            const lGeo = new THREE.BoxGeometry(0.4, 0.4, 0.1); const lMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const lights = [];
-            const lGeo = new THREE.BoxGeometry(0.4, 0.4, 0.1);
-            const lMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
             [-1.2, 0, 1.2].forEach(x => {
                 const l1 = new THREE.Mesh(lGeo, lMat.clone()); l1.position.set(x, 3.5, 5.1); group.add(l1); lights.push(l1);
                 const l2 = new THREE.Mesh(lGeo, lMat.clone()); l2.position.set(x, 0.8, 5.1); group.add(l2); lights.push(l2);
             });
-
-            // --- ADD NAME BOARD ---
             const randName = BUS_NAMES[Math.floor(Math.random() * BUS_NAMES.length)];
-            const nameTex = createNameTexture(randName);
-            const nameMat = new THREE.MeshBasicMaterial({ map: nameTex, transparent: true });
-            const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), nameMat);
-            nameMesh.position.set(0, 4.2, 0); // Float above bus
-            // Billboard effect (face camera? No, just face forward)
-            // It will face +Z (towards player) by default if plane is created facing Z
-            // Actually PlaneGeometry faces +Z. We want it to face +Z (towards camera).
-            // But we might need to rotate it if it looks backwards. Let's test.
-            // Actually objects move towards +Z. Camera looks at -Z.
-            // Bus front is facing +Z. So text should face +Z.
-            group.add(nameMesh);
-            
+            const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({ map: createNameTexture(randName), transparent: true }));
+            nameMesh.position.set(0, 4.2, 0); group.add(nameMesh);
             group.userData = { type: 'bus', lights: lights, busName: randName };
             return group;
         }
 
-        // --- Tuks ---
+        let playerTuk;
         function createTuk(color, isHelago) {
             const group = new THREE.Group();
             createBox(1.5, 0.6, 2.8, color, 0, 0.6, 0, group); 
@@ -227,25 +395,20 @@
             createBox(1.3, 1.0, 0.6, color, 0, 1.0, -0.9, group); 
             const roof = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 3.4), new THREE.MeshStandardMaterial({ color: 0x111111 }));
             roof.position.set(0, 2.4, 0.1); group.add(roof);
-
             if(isHelago) {
                 const cvs = document.createElement('canvas'); cvs.width=128; cvs.height=64;
                 const ctx = cvs.getContext('2d'); ctx.fillStyle='#00A651'; ctx.fillRect(0,0,128,64);
                 ctx.fillStyle='white'; ctx.font='bold 24px Arial'; ctx.fillText('HELAGO', 15, 40);
-                const tex = new THREE.CanvasTexture(cvs);
-                const sign = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.1), new THREE.MeshBasicMaterial({map:tex}));
+                const sign = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.1), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cvs)}));
                 sign.position.set(0, 2.8, 0); group.add(sign);
                 const glow = new THREE.PointLight(0x00ff00, 1, 10); glow.position.set(0, 2, 0); group.add(glow);
-            } else {
-                createBox(0.4, 0.2, 0.1, 0xffffaa, 0, 0.8, -1.2, group);
             }
             return group;
         }
 
-        const playerTuk = createTuk(0xDC2626, false); scene.add(playerTuk);
+        playerTuk = createTuk(state.playerColor, false); scene.add(playerTuk);
         const enemyTuk = createTuk(0x00A651, true); scene.add(enemyTuk);
 
-        // Road
         const road = new THREE.Mesh(new THREE.PlaneGeometry(30, 2000), new THREE.MeshStandardMaterial({ color: 0x222222 }));
         road.rotation.x = -Math.PI/2; road.position.z = -500; road.receiveShadow = true; scene.add(road);
         const lines = [];
@@ -256,28 +419,43 @@
 
         let targetX = 0;
 
-        // --- Logic ---
-        window.startGame = function() {
+        window.toggleGarage = function() {
+            const m = document.getElementById('garage-modal');
+            const totalC = localStorage.getItem('tukCoins') || 0;
+            document.getElementById('total-coins').innerText = totalC;
+            m.classList.toggle('hidden');
+        };
+
+        window.selectColor = function(color, cost) {
+            let totalC = parseInt(localStorage.getItem('tukCoins') || 0);
+            if(totalC >= cost) {
+                if(cost > 0) {
+                    totalC -= cost;
+                    localStorage.setItem('tukCoins', totalC);
+                    document.getElementById('total-coins').innerText = totalC;
+                }
+                state.playerColor = color;
+                localStorage.setItem('tukColor', color);
+                scene.remove(playerTuk); playerTuk = createTuk(color, false); scene.add(playerTuk);
+                alert("පැහැය මාරු කළා!");
+            } else { alert("මගීන් මදි!"); }
+        };
+
+        window.startGameInternal = function() {
             state.playerName = document.getElementById('player-name').value || "Rider";
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-ui').classList.remove('hidden');
             document.getElementById('game-ui').style.display = 'flex';
+            state.score = 0; state.passengers = 0; state.gap = 20; state.frame = 0;
+            state.entities.forEach(e => scene.remove(e.mesh)); state.entities = [];
             state.isPlaying = true; animate();
         };
 
-        // --- Side Warning Function ---
         function showSideWarning(text) {
             const container = document.getElementById('warning-container');
-            const alert = document.createElement('div');
-            alert.className = 'bus-alert';
-            alert.innerHTML = `⚠️ ${text}`;
+            const alert = document.createElement('div'); alert.className = 'bus-alert'; alert.innerHTML = `⚠️ ${text}`;
             container.appendChild(alert);
-            
-            // Remove after 2 seconds
-            setTimeout(() => {
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 300);
-            }, 2000);
+            setTimeout(() => { alert.style.opacity = '0'; setTimeout(() => alert.remove(), 300); }, 2000);
         }
 
         function spawnEntity() {
@@ -287,23 +465,22 @@
             const z = -120 - Math.random() * 20;
             let mesh, isPassenger=false, isBus=false;
 
-            if (rand < 0.3) {
+            if (rand < 0.45) {
                 isPassenger = true;
                 const g = new THREE.Group();
                 const b = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,1.2), new THREE.MeshStandardMaterial({color:0x3B82F6})); b.position.y=0.6;
                 const h = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({color:0xffccaa})); h.position.y=1.3;
                 g.add(b); g.add(h); mesh = g;
             } else if (rand > busChance) {
-                isBus = true;
-                mesh = createPrivateBus();
-                // Trigger SIDE Warning with the Bus Name
-                showSideWarning(mesh.userData.busName);
+                isBus = true; mesh = createPrivateBus(); showSideWarning(mesh.userData.busName);
+                if(Math.random() > 0.6) {
+                    const shout = BUS_SHOUTS[Math.floor(Math.random() * BUS_SHOUTS.length)];
+                    showVisualShout(shout, 'enemy');
+                }
             } else {
-                mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0), new THREE.MeshStandardMaterial({color:0x555555})); 
-                mesh.position.y=1.0;
+                mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0), new THREE.MeshStandardMaterial({color:0x555555})); mesh.position.y=1.0;
             }
-            mesh.position.set(x, mesh.position.y||0, z); 
-            mesh.castShadow = true; scene.add(mesh);
+            mesh.position.set(x, mesh.position.y||0, z); mesh.castShadow = true; scene.add(mesh);
             state.entities.push({ mesh, isPassenger, isBus });
         }
 
@@ -315,22 +492,29 @@
         }
 
         window.shareScore = function() {
-            const text = `අඩෝ මම ${state.playerName}! Helago එකෙන් බේරිලා "${getBadge(Math.floor(state.score))}" එකක් ගත්තා! ස්කෝර් එක: ${Math.floor(state.score)}. වරෙන් ගේමක් ගහන්න! 👇`;
-            const url = window.location.href;
-            if (navigator.share) navigator.share({ title: 'Tuk Rush', text: text, url: url });
-            else { 
-                const d = document.createElement("textarea"); d.value=text+" "+url; document.body.appendChild(d); d.select(); document.execCommand("copy"); document.body.removeChild(d);
-                alert("Link Copied!"); 
-            }
+            const text = `අඩෝ මම ${state.playerName}! Helago එකෙන් බේරිලා "${getBadge(Math.floor(state.score))}" එකක් ගත්තා! ස්කෝර් එක: ${Math.floor(state.score)}.`;
+            if (navigator.share) navigator.share({ title: 'Tuk Rush', text: text, url: window.location.href });
+            else { alert("Link Copied!"); }
         };
 
         function gameOver() {
             state.isPlaying = false; cancelAnimationFrame(animationId);
             document.getElementById('game-ui').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.remove('hidden');
-            document.getElementById('game-over-screen').style.display = 'flex';
-            document.getElementById('final-score').innerText = Math.floor(state.score);
+            const goScreen = document.getElementById('game-over-screen');
+            goScreen.classList.remove('hidden');
+            goScreen.style.display = 'flex';
+            
+            const crashLine = CRASH_SHOUTS[Math.floor(Math.random() * CRASH_SHOUTS.length)];
+            showVisualShout(crashLine, 'player');
+
+            let currentCoins = parseInt(localStorage.getItem('tukCoins') || 0);
+            localStorage.setItem('tukCoins', currentCoins + state.passengers);
+
+            const finalScore = Math.floor(state.score);
+            document.getElementById('final-score').innerText = finalScore;
             document.getElementById('funny-badge').innerText = getBadge(state.score);
+
+            if(window.saveScoreToDB) window.saveScoreToDB(state.playerName, finalScore);
         }
 
         function animate() {
@@ -338,7 +522,7 @@
             animationId = requestAnimationFrame(animate); state.frame++;
             renderer.clear();
 
-            state.speedMultiplier = 1 + (state.score / 2000);
+            state.speedMultiplier = 1 + (state.score / 5000);
             const currentSpeed = CONFIG.startSpeed * state.speedMultiplier;
 
             playerTuk.position.x += (targetX - playerTuk.position.x) * 0.15;
@@ -368,7 +552,7 @@
 
                 if (dz < 2.5 && dx < 2.2) {
                     if (ent.isPassenger) {
-                        state.score += 100; state.passengers++; state.gap += 5; if(state.gap>CONFIG.maxGap) state.gap=CONFIG.maxGap;
+                        state.score += 100; state.passengers++; state.gap += 8; if(state.gap>CONFIG.maxGap) state.gap=CONFIG.maxGap;
                         scene.remove(ent.mesh); state.entities.splice(i, 1);
                     } else {
                         if(ent.isBus) state.gap = -10; else { state.gap -= 8; state.score -= 50; }
