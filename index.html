@@ -14,23 +14,41 @@
         /* Mirror Styling */
         .mirror-frame {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            width: 160px; height: 60px;
-            background: #111; border: 2px solid #666; border-radius: 10px 10px 5px 5px;
-            overflow: hidden; box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-            z-index: 50;
+            width: 160px; height: 70px;
+            background: rgba(0, 0, 0, 0); 
+            border: 3px solid #888; border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            z-index: 50; overflow: hidden;
+        }
+        .mirror-glass {
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
+            pointer-events: none;
         }
         
-        /* Danger Flash */
+        /* Side Warning Notification (Top Right) */
+        #warning-container {
+            position: absolute; top: 90px; right: 0; 
+            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+            pointer-events: none; overflow: hidden; padding-right: 10px;
+        }
+        .bus-alert {
+            background: linear-gradient(90deg, #800080, #ff00ff);
+            color: white; padding: 10px 20px; border-radius: 8px 0 0 8px;
+            font-weight: 900; text-transform: uppercase;
+            border-left: 5px solid #ffff00;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.5);
+            transform: translateX(100%);
+            animation: slideIn 0.3s forwards, pulseWarn 0.5s infinite alternate;
+        }
+        @keyframes slideIn { to { transform: translateX(0); } }
+        @keyframes pulseWarn { from { text-shadow: 0 0 5px white; } to { text-shadow: 0 0 20px yellow; } }
+
         .danger-overlay { animation: flashRed 0.5s infinite; pointer-events: none; }
         @keyframes flashRed { 0%, 100% { box-shadow: inset 0 0 0 red; } 50% { box-shadow: inset 0 0 80px red; } }
-
-        /* Bus Lights */
-        .bus-warning { animation: blinkText 0.2s infinite; text-shadow: 0 0 10px #ff00ff; }
-        @keyframes blinkText { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
         
-        /* Rules Box */
-        .rules-list li { margin-bottom: 5px; font-size: 0.9rem; color: #ccc; text-align: left; }
-        .rules-list span { color: #FACC15; font-weight: bold; }
+        .rules-list li { margin-bottom: 6px; font-size: 0.85rem; color: #ddd; text-align: left; display: flex; align-items: start; gap: 6px; }
+        .rules-list span { color: #FACC15; font-weight: bold; white-space: nowrap; }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -39,46 +57,42 @@
 
     <div id="game-ui" class="absolute inset-0 z-10 hidden flex-col justify-between p-4 pointer-events-none">
         
-        <div class="flex justify-between items-start w-full pointer-events-auto mt-1">
-            <div class="bg-gray-800/80 backdrop-blur border-l-4 border-yellow-500 px-4 py-2 rounded-r-xl">
+        <div class="flex justify-between items-start w-full pointer-events-auto mt-1 relative">
+            <div class="bg-gray-800/80 backdrop-blur border-l-4 border-yellow-500 px-4 py-2 rounded-r-xl shadow-lg">
                 <p class="text-[10px] text-gray-400 font-bold uppercase">SCORE</p>
                 <p id="score-display" class="text-2xl font-black font-tech text-yellow-400">0</p>
             </div>
 
-            <div class="mirror-frame">
-                <div id="mirror-alert" class="absolute inset-0 border-4 border-red-600 hidden animate-pulse z-20"></div>
-                </div>
+            <div class="mirror-frame" id="mirror-box">
+                <div class="mirror-glass"></div>
+                <div id="mirror-alert" class="absolute inset-0 border-4 border-red-600 hidden animate-pulse"></div>
+            </div>
 
-            <div class="bg-gray-800/80 backdrop-blur border-r-4 border-blue-500 px-4 py-2 rounded-l-xl">
+            <div class="bg-gray-800/80 backdrop-blur border-r-4 border-blue-500 px-4 py-2 rounded-l-xl shadow-lg">
                 <p class="text-[10px] text-gray-400 font-bold uppercase text-right">PICKUPS</p>
                 <p id="passenger-count" class="text-2xl font-black text-right font-tech text-blue-400">0</p>
             </div>
         </div>
 
-        <div id="warning-msg" class="absolute top-1/2 left-0 right-0 text-center hidden transform -translate-y-1/2">
-            <h2 class="text-3xl font-black text-white bg-purple-900/90 inline-block px-8 py-4 rounded skew-x-12 uppercase bus-warning border-4 border-pink-500 shadow-[0_0_50px_purple]">
-                ⚡ පිස්සු බස් එනවා! ⚡
-            </h2>
-        </div>
+        <div id="warning-container"></div>
     </div>
 
-    <div id="start-screen" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/90 p-6 text-center overflow-y-auto">
-        <h1 class="text-5xl font-black text-yellow-400 mb-2 italic tracking-tighter font-tech" style="text-shadow: 0 0 20px orange;">
+    <div id="start-screen" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/95 p-4 text-center overflow-y-auto">
+        <h1 class="text-5xl font-black text-yellow-400 mb-2 italic tracking-tighter font-tech" style="text-shadow: 0 0 25px orange;">
             TUK<br><span class="text-white">RUSH</span>
         </h1>
         
         <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 max-w-sm w-full mb-6 shadow-2xl text-left">
-            <h3 class="text-white font-bold text-lg mb-3 border-b border-gray-600 pb-1">🚦 ගේම් එකේ නීති (Rules):</h3>
-            <ul class="rules-list list-disc pl-5">
-                <li><span>හෙලගෝ ටුක් එක (කොළ පාට):</span> ඒක පස්සෙන් එනවා. අහුවෙන්න එපා!</li>
-                <li><span>මගීන් (Passengers):</span> මගීන්ව ගන්න. එතකොට වේගය වැඩි වෙලා හෙලගෝ එකෙන් බේරෙන්න පුළුවන්.</li>
-                <li><span>පිස්සු බස්:</span> ලකුණු 150 පැනපු ගමන් පාට පාට බස් එනවා. ලයිට් ගහනවා දැක්කොත් අයින් වෙන්න.</li>
-                <li><span>කන්නාඩිය:</span> උඩ තියන කන්නාඩියෙන් හෙලගෝ එක එන දුර බලාගන්න.</li>
+            <h3 class="text-white font-bold text-lg mb-3 border-b border-gray-600 pb-2">🚦 ගේම් එකේ නීති:</h3>
+            <ul class="rules-list pl-1">
+                <li><span>👀 කන්නාඩිය:</span> පස්සෙන් එන "හෙලගෝ" ටුක් එක බලන්න.</li>
+                <li><span>🙋‍♂️ මගීන්:</span> මගීන්ව ගත්තම Boost වෙනවා.</li>
+                <li><span>🚌 පිස්සු බස්:</span> ලකුණු 150 පැන්නම "මාර සෙනග", "කැලේ රජා" වගේ පිස්සු බස් එනවා. අයින් වෙන්න!</li>
             </ul>
         </div>
         
         <div class="w-full max-w-xs space-y-3">
-            <input type="text" id="player-name" placeholder="ඔයාගේ නම මෙතන ගහන්න" maxlength="12"
+            <input type="text" id="player-name" placeholder="ඔයාගේ නම" maxlength="12"
                    class="w-full px-4 py-3 rounded-xl bg-gray-900 border-2 border-gray-600 text-white text-center font-bold outline-none focus:border-yellow-500 transition-colors">
             
             <button onclick="startGame()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xl py-4 rounded-xl shadow-lg transform active:scale-95 transition font-tech">
@@ -88,23 +102,19 @@
     </div>
 
     <div id="game-over-screen" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md p-6 text-center">
-        <h2 class="text-6xl font-black text-red-600 mb-2 italic font-tech glitch-text">WASTED!</h2>
-        
+        <h2 class="text-6xl font-black text-red-600 mb-2 italic font-tech">WASTED!</h2>
         <div class="bg-gray-900 p-6 rounded-2xl w-full max-w-sm border border-gray-800 shadow-2xl mb-6">
             <p class="text-xs text-gray-500 uppercase mb-1">Your Rank</p>
             <h3 id="funny-badge" class="text-2xl font-black text-yellow-400 mb-4 animate-pulse">???</h3>
-            
             <div class="flex justify-between text-sm text-gray-400 border-t border-gray-800 pt-4">
                 <span>Total Score:</span>
                 <span id="final-score" class="font-bold text-white text-xl">0</span>
             </div>
         </div>
-
         <div class="flex flex-col gap-3 w-full max-w-sm">
             <button onclick="shareScore()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg transform hover:scale-105 transition flex items-center justify-center gap-2">
-                <span>📲</span> යාලුවන්ට චැලෙන්ජ් කරන්න
+                <span>📲</span> චැලෙන්ජ් කරන්න
             </button>
-            
             <button onclick="window.location.reload()" class="bg-white hover:bg-gray-200 text-black font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
                 <span>🔄</span> ආපහු යමු (Try Again)
             </button>
@@ -116,87 +126,69 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        // --- Game Config ---
-        const CONFIG = {
-            laneWidth: 14,
-            startSpeed: 0.6,
-            maxGap: 30, // Max distance you can get ahead
-            enemySpeed: 0.02, // How fast enemy closes gap naturally
-        };
+        const CONFIG = { laneWidth: 14, startSpeed: 0.6, maxGap: 30, enemySpeed: 0.02 };
+        
+        // FUNNY BUS NAMES LIST
+        const BUS_NAMES = [
+            "මාර සෙනග", "කැලේ රජා", "හෝල්ට් නෑ", "කුඩු එක්ස්ප්‍රස්", 
+            "නයිට් රයිඩර්", "අවතාරේ", "සොනික්", "Road Killer", 
+            "මාර දූතයා", "Jet Liner", "Air Bus", "Flying Fish"
+        ];
 
         let state = {
-            isPlaying: false,
-            score: 0,
-            passengers: 0,
-            gap: 20, // Starting gap (Enemy is 20 units behind)
-            speedMultiplier: 1.0,
-            frame: 0,
-            playerName: "Rider",
-            entities: []
+            isPlaying: false, score: 0, passengers: 0, gap: 20, 
+            speedMultiplier: 1.0, frame: 0, playerName: "Rider", entities: []
         };
-
         let animationId;
 
-        // --- Three.js Setup ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.Fog(0x050505, 10, 100);
-
-        // 1. Main Camera (Player View)
+        // Three.js Setup
+        const scene = new THREE.Scene(); scene.background = new THREE.Color(0x050505); scene.fog = new THREE.Fog(0x050505, 10, 100);
         const mainCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-        mainCamera.position.set(0, 6, 14); // Behind player
-        mainCamera.lookAt(0, 0, -10);
-
-        // 2. Mirror Camera (Rear View)
-        // Positioned slightly in front of player, looking BACK towards +Z
-        const mirrorCamera = new THREE.PerspectiveCamera(60, 160/60, 0.1, 1000); // Aspect match CSS dims
-        mirrorCamera.position.set(0, 4, -5); 
-        mirrorCamera.lookAt(0, 1, 50); // Look way back
+        mainCamera.position.set(0, 6, 14); mainCamera.lookAt(0, 0, -10);
+        const mirrorCamera = new THREE.PerspectiveCamera(60, 2.2, 0.1, 1000);
+        mirrorCamera.position.set(0, 4, -4); mirrorCamera.lookAt(0, 2, 50);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.enabled = true; renderer.autoClear = false;
         document.getElementById('game-container').appendChild(renderer.domElement);
 
-        // Lights
-        const ambLight = new THREE.AmbientLight(0xffffff, 0.2);
-        scene.add(ambLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        dirLight.position.set(10, 20, 10);
-        dirLight.castShadow = true;
-        scene.add(dirLight);
+        const ambLight = new THREE.AmbientLight(0xffffff, 0.2); scene.add(ambLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5); dirLight.position.set(10, 20, 10); dirLight.castShadow = true; scene.add(dirLight);
+        const headLight = new THREE.SpotLight(0xffffaa, 1.8); headLight.position.set(0, 3, -1); headLight.target.position.set(0, 0, -30);
+        headLight.angle = 0.6; headLight.penumbra = 0.5; headLight.castShadow = true; scene.add(headLight); scene.add(headLight.target);
 
-        // HEADLIGHT (Spotlight)
-        const headLight = new THREE.SpotLight(0xffffaa, 1.5);
-        headLight.position.set(0, 3, -1); // Attached to player position logic
-        headLight.target.position.set(0, 0, -30);
-        headLight.angle = 0.6;
-        headLight.penumbra = 0.5;
-        headLight.castShadow = true;
-        scene.add(headLight);
-        scene.add(headLight.target);
-
-        // --- Models ---
+        // Helper: Create Box
         function createBox(w, h, d, color, x, y, z, parent) {
             const geo = new THREE.BoxGeometry(w, h, d);
             const mat = new THREE.MeshStandardMaterial({ color: color });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, y, z);
-            mesh.castShadow = true;
-            if(parent) parent.add(mesh);
-            return mesh;
+            const mesh = new THREE.Mesh(geo, mat); mesh.position.set(x, y, z); mesh.castShadow = true;
+            if(parent) parent.add(mesh); return mesh;
         }
 
-        // --- Private Bus ---
+        // Helper: Text Texture for Bus Names
+        function createNameTexture(name) {
+            const cvs = document.createElement('canvas'); cvs.width = 256; cvs.height = 64;
+            const ctx = cvs.getContext('2d');
+            // Transparent background
+            ctx.fillStyle = "rgba(0,0,0,0)"; ctx.fillRect(0,0,256,64);
+            // Text Style
+            ctx.shadowColor = "black"; ctx.shadowBlur = 4;
+            ctx.fillStyle = "#FFD700"; // Gold color
+            ctx.font = "bold 30px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(name, 128, 32);
+            return new THREE.CanvasTexture(cvs);
+        }
+
+        // --- Create Private Bus with Name ---
         function createPrivateBus() {
             const group = new THREE.Group();
-            const colors = [0x8A2BE2, 0x0000FF, 0xFF1493, 0x00FF00]; // Purple, Blue, Pink, Green
+            const colors = [0x8A2BE2, 0x0000FF, 0xFF1493, 0x00FF00];
             const col = colors[Math.floor(Math.random() * colors.length)];
             
-            // Body
+            // Bus Body
             createBox(3.4, 3.8, 10, col, 0, 1.9, 0, group);
-            // Window
             const win = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.5, 8), new THREE.MeshStandardMaterial({color:0x000000}));
             win.position.set(0, 2.5, 0); group.add(win);
 
@@ -204,38 +196,47 @@
             const lights = [];
             const lGeo = new THREE.BoxGeometry(0.4, 0.4, 0.1);
             const lMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            
-            // Front Top & Bottom lights
             [-1.2, 0, 1.2].forEach(x => {
                 const l1 = new THREE.Mesh(lGeo, lMat.clone()); l1.position.set(x, 3.5, 5.1); group.add(l1); lights.push(l1);
                 const l2 = new THREE.Mesh(lGeo, lMat.clone()); l2.position.set(x, 0.8, 5.1); group.add(l2); lights.push(l2);
             });
+
+            // --- ADD NAME BOARD ---
+            const randName = BUS_NAMES[Math.floor(Math.random() * BUS_NAMES.length)];
+            const nameTex = createNameTexture(randName);
+            const nameMat = new THREE.MeshBasicMaterial({ map: nameTex, transparent: true });
+            const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), nameMat);
+            nameMesh.position.set(0, 4.2, 0); // Float above bus
+            // Billboard effect (face camera? No, just face forward)
+            // It will face +Z (towards player) by default if plane is created facing Z
+            // Actually PlaneGeometry faces +Z. We want it to face +Z (towards camera).
+            // But we might need to rotate it if it looks backwards. Let's test.
+            // Actually objects move towards +Z. Camera looks at -Z.
+            // Bus front is facing +Z. So text should face +Z.
+            group.add(nameMesh);
             
-            group.userData = { type: 'bus', lights: lights };
+            group.userData = { type: 'bus', lights: lights, busName: randName };
             return group;
         }
 
         // --- Tuks ---
         function createTuk(color, isHelago) {
             const group = new THREE.Group();
-            createBox(1.5, 0.6, 2.8, color, 0, 0.6, 0, group); // Base
-            createBox(1.4, 1.4, 1.4, color, 0, 1.4, 0.6, group); // Cabin
-            createBox(1.3, 1.0, 0.6, color, 0, 1.0, -0.9, group); // Front
-            
+            createBox(1.5, 0.6, 2.8, color, 0, 0.6, 0, group); 
+            createBox(1.4, 1.4, 1.4, color, 0, 1.4, 0.6, group); 
+            createBox(1.3, 1.0, 0.6, color, 0, 1.0, -0.9, group); 
             const roof = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 3.4), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-            roof.position.set(0, 2.4, 0.1);
-            group.add(roof);
+            roof.position.set(0, 2.4, 0.1); group.add(roof);
 
             if(isHelago) {
-                // Helago Sign (Simple Green Box with Text Texture)
-                const canvas = document.createElement('canvas'); canvas.width=128; canvas.height=64;
-                const ctx = canvas.getContext('2d'); ctx.fillStyle='#00A651'; ctx.fillRect(0,0,128,64);
+                const cvs = document.createElement('canvas'); cvs.width=128; cvs.height=64;
+                const ctx = cvs.getContext('2d'); ctx.fillStyle='#00A651'; ctx.fillRect(0,0,128,64);
                 ctx.fillStyle='white'; ctx.font='bold 24px Arial'; ctx.fillText('HELAGO', 15, 40);
-                const tex = new THREE.CanvasTexture(canvas);
+                const tex = new THREE.CanvasTexture(cvs);
                 const sign = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.1), new THREE.MeshBasicMaterial({map:tex}));
                 sign.position.set(0, 2.8, 0); group.add(sign);
+                const glow = new THREE.PointLight(0x00ff00, 1, 10); glow.position.set(0, 2, 0); group.add(glow);
             } else {
-                // Player Headlight source visual
                 createBox(0.4, 0.2, 0.1, 0xffffaa, 0, 0.8, -1.2, group);
             }
             return group;
@@ -246,10 +247,7 @@
 
         // Road
         const road = new THREE.Mesh(new THREE.PlaneGeometry(30, 2000), new THREE.MeshStandardMaterial({ color: 0x222222 }));
-        road.rotation.x = -Math.PI/2; road.position.z = -500; road.receiveShadow = true;
-        scene.add(road);
-
-        // Lines
+        road.rotation.x = -Math.PI/2; road.position.z = -500; road.receiveShadow = true; scene.add(road);
         const lines = [];
         for(let i=0; i<40; i++) {
             const l = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 10), new THREE.MeshBasicMaterial({ color: 0xffffff }));
@@ -259,55 +257,53 @@
         let targetX = 0;
 
         // --- Logic ---
-
         window.startGame = function() {
-            const name = document.getElementById('player-name').value;
-            state.playerName = name || "Rider";
-            
+            state.playerName = document.getElementById('player-name').value || "Rider";
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-ui').classList.remove('hidden');
             document.getElementById('game-ui').style.display = 'flex';
-            
-            state.isPlaying = true;
-            animate();
+            state.isPlaying = true; animate();
         };
 
+        // --- Side Warning Function ---
+        function showSideWarning(text) {
+            const container = document.getElementById('warning-container');
+            const alert = document.createElement('div');
+            alert.className = 'bus-alert';
+            alert.innerHTML = `⚠️ ${text}`;
+            container.appendChild(alert);
+            
+            // Remove after 2 seconds
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 2000);
+        }
+
         function spawnEntity() {
-            const busChance = state.score > 150 ? 0.85 : 1.1; // Buses start after 150 score
+            const busChance = state.score > 150 ? 0.85 : 1.1; 
             const rand = Math.random();
             const x = (Math.random() - 0.5) * CONFIG.laneWidth;
             const z = -120 - Math.random() * 20;
-
             let mesh, isPassenger=false, isBus=false;
 
             if (rand < 0.3) {
-                // Passenger
                 isPassenger = true;
                 const g = new THREE.Group();
                 const b = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,1.2), new THREE.MeshStandardMaterial({color:0x3B82F6})); b.position.y=0.6;
                 const h = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({color:0xffccaa})); h.position.y=1.3;
                 g.add(b); g.add(h); mesh = g;
             } else if (rand > busChance) {
-                // Private Bus
                 isBus = true;
                 mesh = createPrivateBus();
-                // Warning Logic
-                const w = document.getElementById('warning-msg');
-                w.classList.remove('hidden');
-                setTimeout(()=>w.classList.add('hidden'), 1500);
+                // Trigger SIDE Warning with the Bus Name
+                showSideWarning(mesh.userData.busName);
             } else {
-                // Obstacle
                 mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0), new THREE.MeshStandardMaterial({color:0x555555})); 
                 mesh.position.y=1.0;
             }
-
-            mesh.position.set(x, mesh.position.y||0, z); // Z is relative to world, we move objects +Z
-            // Actually in this code, Player stays at 0. Objects spawn far (-Z) and move to +Z.
-            // But we need to account for player moving "forward" illusion.
-            // We just spawn them at fixed -Z relative to player (who is at 0).
-            
-            mesh.castShadow = true;
-            scene.add(mesh);
+            mesh.position.set(x, mesh.position.y||0, z); 
+            mesh.castShadow = true; scene.add(mesh);
             state.entities.push({ mesh, isPassenger, isBus });
         }
 
@@ -329,8 +325,7 @@
         };
 
         function gameOver() {
-            state.isPlaying = false;
-            cancelAnimationFrame(animationId);
+            state.isPlaying = false; cancelAnimationFrame(animationId);
             document.getElementById('game-ui').classList.add('hidden');
             document.getElementById('game-over-screen').classList.remove('hidden');
             document.getElementById('game-over-screen').style.display = 'flex';
@@ -340,118 +335,76 @@
 
         function animate() {
             if (!state.isPlaying) return;
-            animationId = requestAnimationFrame(animate);
-            state.frame++;
+            animationId = requestAnimationFrame(animate); state.frame++;
+            renderer.clear();
 
-            // Speed
             state.speedMultiplier = 1 + (state.score / 2000);
             const currentSpeed = CONFIG.startSpeed * state.speedMultiplier;
 
-            // Player Logic
             playerTuk.position.x += (targetX - playerTuk.position.x) * 0.15;
-            playerTuk.rotation.z = (playerTuk.position.x - targetX) * 0.08; // Tilt
-            playerTuk.rotation.y = -(playerTuk.position.x - targetX) * 0.05; // Turn
-
-            // HEADLIGHT FOLLOW
+            playerTuk.rotation.z = (playerTuk.position.x - targetX) * 0.08; 
+            playerTuk.rotation.y = -(playerTuk.position.x - targetX) * 0.05; 
             headLight.position.x = playerTuk.position.x;
-            headLight.target.position.x = playerTuk.position.x * 2; // Target moves more to simulate steering light
+            headLight.target.position.x = playerTuk.position.x * 3;
 
-            // Enemy Logic (Rear Mirror)
-            // Enemy Z position: Player is at 0. Enemy is behind (positive Z in camera view terms, but waiting...)
-            // If camera is at +14 looking at -10. Player is at 0.
-            // "Behind" the player is +Z.
-            // Gap = 20 means Enemy is at +20.
-            enemyTuk.position.z = state.gap; // Direct Z since player is 0
+            enemyTuk.position.z = state.gap; 
             enemyTuk.position.x += (playerTuk.position.x - enemyTuk.position.x) * 0.05;
 
-            // Moving Entities
             const spawnRate = Math.max(20, 60 - Math.floor(state.score/150));
             if(state.frame % spawnRate === 0) spawnEntity();
 
             for (let i = state.entities.length - 1; i >= 0; i--) {
                 const ent = state.entities[i];
-                let speed = currentSpeed;
-                if(ent.isBus) speed *= 1.5; // Fast bus
-
+                let speed = currentSpeed; if(ent.isBus) speed *= 1.5; 
                 ent.mesh.position.z += speed;
 
-                // Bus Light Animation
                 if(ent.isBus && state.frame % 4 === 0) {
                     const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
                     ent.mesh.userData.lights.forEach(l => l.material.color.setHex(colors[Math.floor(Math.random()*colors.length)]));
                 }
 
-                // Collision
                 const dx = Math.abs(ent.mesh.position.x - playerTuk.position.x);
-                const dz = Math.abs(ent.mesh.position.z - playerTuk.position.z); // Player Z is 0
+                const dz = Math.abs(ent.mesh.position.z - playerTuk.position.z);
 
                 if (dz < 2.5 && dx < 2.2) {
                     if (ent.isPassenger) {
-                        state.score += 100; state.passengers++;
-                        state.gap += 5; if(state.gap>CONFIG.maxGap) state.gap=CONFIG.maxGap;
+                        state.score += 100; state.passengers++; state.gap += 5; if(state.gap>CONFIG.maxGap) state.gap=CONFIG.maxGap;
                         scene.remove(ent.mesh); state.entities.splice(i, 1);
                     } else {
-                        // Crash
-                        if(ent.isBus) state.gap = -10; // Instant death
-                        else {
-                            state.gap -= 8;
-                            state.score -= 50;
-                        }
+                        if(ent.isBus) state.gap = -10; else { state.gap -= 8; state.score -= 50; }
                         scene.remove(ent.mesh); state.entities.splice(i, 1);
-                        // Shake
                         mainCamera.position.x = (Math.random()-0.5)*1; setTimeout(()=>mainCamera.position.x=0, 100);
                     }
-                } else if (ent.mesh.position.z > 30) { // Passed camera
-                    scene.remove(ent.mesh); state.entities.splice(i, 1);
-                }
+                } else if (ent.mesh.position.z > 30) { scene.remove(ent.mesh); state.entities.splice(i, 1); }
             }
 
-            // Road Lines
-            lines.forEach(l => {
-                l.position.z += currentSpeed;
-                if(l.position.z > 20) l.position.z -= 1000;
-            });
+            lines.forEach(l => { l.position.z += currentSpeed; if(l.position.z > 20) l.position.z -= 1000; });
+            state.gap -= CONFIG.enemySpeed * state.speedMultiplier; state.score += 0.5;
 
-            // Game Logic
-            state.gap -= CONFIG.enemySpeed * state.speedMultiplier;
-            state.score += 0.5;
-
-            // Update UI
             document.getElementById('score-display').innerText = Math.floor(state.score);
             document.getElementById('passenger-count').innerText = state.passengers;
-            
-            // Mirror Alert
             if(state.gap < 8) document.getElementById('mirror-alert').classList.remove('hidden');
             else document.getElementById('mirror-alert').classList.add('hidden');
-
             if(state.gap <= 2) gameOver();
 
-            // RENDER 1: MAIN VIEW
             renderer.setScissorTest(false);
             renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
             renderer.render(scene, mainCamera);
 
-            // RENDER 2: MIRROR VIEW
-            renderer.setScissorTest(true);
-            const w = 160, h = 60; // Match CSS
-            const x = (window.innerWidth/2) - (w/2);
-            const y = window.innerHeight - h - 10;
-            renderer.setScissor(x, y, w, h);
-            renderer.setViewport(x, y, w, h);
-            
-            // Mirror Cam Follows Player X
-            mirrorCamera.position.x = playerTuk.position.x;
-            // Mirror looks at Enemy (Enemy is at +Z)
-            mirrorCamera.lookAt(enemyTuk.position.x, 1, enemyTuk.position.z);
-            
-            renderer.render(scene, mirrorCamera);
+            const mirrorBox = document.getElementById('mirror-box');
+            if (mirrorBox) {
+                const rect = mirrorBox.getBoundingClientRect();
+                const w = rect.width; const h = rect.height; const l = rect.left; const b = window.innerHeight - rect.bottom; 
+                renderer.setScissorTest(true); renderer.setScissor(l, b, w, h); renderer.setViewport(l, b, w, h);
+                mirrorCamera.position.x = playerTuk.position.x;
+                mirrorCamera.lookAt(enemyTuk.position.x, 2, enemyTuk.position.z);
+                renderer.render(scene, mirrorCamera);
+            }
         }
-
-        // Input
+        
         window.addEventListener('touchmove', (e)=>{ if(state.isPlaying) targetX=(e.touches[0].clientX/window.innerWidth*CONFIG.laneWidth)-(CONFIG.laneWidth/2); }, {passive:false});
         window.addEventListener('mousemove', (e)=>{ if(state.isPlaying) targetX=(e.clientX/window.innerWidth*CONFIG.laneWidth)-(CONFIG.laneWidth/2); });
         window.addEventListener('resize', ()=>{ mainCamera.aspect=window.innerWidth/window.innerHeight; mainCamera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-
     </script>
 </body>
 </html>
