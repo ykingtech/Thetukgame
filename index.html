@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tuk Rush - Day/Night Cycle</title>
+    <title>Tuk Rush - DJ Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700;900&family=Orbitron:wght@900&display=swap" rel="stylesheet">
     
@@ -11,6 +11,21 @@
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Noto Sans Sinhala', sans-serif; touch-action: none; user-select: none; }
         .font-tech { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
         
+        #mute-btn {
+            position: absolute; top: 10px; right: 10px; z-index: 100;
+            background: rgba(255, 255, 255, 0.2); border: 2px solid white;
+            color: white; padding: 8px; border-radius: 50%; font-size: 1.2rem;
+            cursor: pointer; backdrop-filter: blur(5px);
+        }
+
+        #social-btn-corner {
+            position: absolute; top: 60px; right: 10px; z-index: 90;
+            background: #1877F2; color: white; padding: 5px 10px;
+            border-radius: 20px; font-weight: bold; font-size: 0.7rem;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 5px;
+        }
+
         .mirror-frame {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
             width: 160px; height: 70px;
@@ -42,51 +57,50 @@
         @keyframes slideIn { to { transform: translateX(0); } }
         @keyframes pulseWarn { from { text-shadow: 0 0 5px white; } to { text-shadow: 0 0 20px yellow; } }
 
-        #shout-container {
-            position: absolute; inset: 0; pointer-events: none; z-index: 45; overflow: hidden;
-        }
+        #shout-container { position: absolute; inset: 0; pointer-events: none; z-index: 45; overflow: hidden; }
         .shout-bubble {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.95);
-            color: black;
-            padding: 8px 12px; border-radius: 12px;
-            border: 3px solid black;
-            font-weight: 900; font-size: 0.9rem;
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-            animation: popUp 0.3s ease-out;
-            white-space: nowrap;
-            max-width: 150px;
-            text-align: center;
-            white-space: normal;
+            position: absolute; background: rgba(255, 255, 255, 0.95); color: black;
+            padding: 8px 12px; border-radius: 12px; border: 3px solid black;
+            font-weight: 900; font-size: 0.9rem; box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+            animation: popUp 0.3s ease-out; white-space: nowrap; max-width: 150px;
+            text-align: center; white-space: normal;
         }
         .shout-player {
             background: #FFEB3B; color: #D50000; border-color: #D50000;
-            left: 50%; bottom: 40%; 
-            transform: translateX(-50%);
-            font-size: 1.2rem; text-shadow: 1px 1px 0px white;
-            z-index: 60;
-            max-width: none;
+            left: 50%; bottom: 40%; transform: translateX(-50%);
+            font-size: 1.2rem; text-shadow: 1px 1px 0px white; z-index: 60; max-width: none;
         }
         @keyframes popUp { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .leaderboard-row:nth-child(1) { color: #FFD700; font-weight: 900; border: 1px solid gold; } 
         .leaderboard-row:nth-child(2) { color: #C0C0C0; font-weight: 800; } 
         .leaderboard-row:nth-child(3) { color: #CD7F32; font-weight: 800; }
-        
         .shake { animation: shake 0.5s; border-color: red !important; }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
-        
         .pickup-anim {
             position: absolute; color: #00FF00; font-weight: 900; font-size: 1.5rem;
             animation: floatUp 0.8s forwards; pointer-events: none; z-index: 70;
             text-shadow: 0 0 5px black;
         }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(1.5); opacity: 0; } }
-        
-        /* Time Cycle Indicator */
-        #time-indicator {
-            position: absolute; top: 10px; left: 10px; z-index: 60;
-            font-size: 2rem;
+        #time-indicator { position: absolute; top: 10px; left: 10px; z-index: 60; font-size: 2rem; }
+
+        .license-card {
+            background: linear-gradient(180deg, #f3f4f6 0%, #d1d5db 100%);
+            border: 4px solid #1f2937; border-radius: 16px; position: relative; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .license-header { background: #111827; color: white; padding: 10px; text-align: center; border-bottom: 4px solid #f59e0b; }
+        .stamp {
+            position: absolute; right: 10px; bottom: 10px; border: 3px solid #ef4444; color: #ef4444;
+            padding: 5px; font-weight: 900; transform: rotate(-15deg); opacity: 0.7; font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Loading Indicator */
+        #loading-msg {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: yellow; padding: 5px 15px;
+            border-radius: 20px; font-size: 12px; z-index: 1000; display: none;
         }
     </style>
 </head>
@@ -95,6 +109,12 @@
     <div id="game-container" class="absolute inset-0 z-0"></div>
     <div id="shout-container"></div>
     <div id="time-indicator">🌙</div>
+    <div id="loading-msg">🎵 සින්දුව ලෝඩ් වෙනවා...</div>
+    
+    <button id="mute-btn" onclick="toggleSound()">🔊</button>
+    <a href="https://www.facebook.com/share/1DLZicSmUT/" target="_blank" id="social-btn-corner">
+        <span>👍</span> Follow Page
+    </a>
 
     <div id="game-ui" class="absolute inset-0 z-10 hidden flex-col justify-between p-4 pointer-events-none">
         <div class="flex justify-between items-start w-full pointer-events-auto mt-1 relative">
@@ -122,9 +142,9 @@
         <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 max-w-sm w-full mb-4 shadow-2xl text-left">
             <h3 class="text-white font-bold text-lg mb-2 border-b border-gray-600 pb-2">🚦 Update Notes:</h3>
             <ul class="rules-list pl-1 text-sm text-gray-300">
-                <li>☀️ ලකුණු 5000න් පස්සේ දවල් වෙනවා!</li>
-                <li>🏙️ දවල්ට පාර දෙපැත්තේ විකාර බිල්ඩිං.</li>
-                <li>🚌 බස්, ගල්, මගීන් ඔක්කොම තියෙනවා.</li>
+                <li>🎧 <b>Music:</b> 'audio.mp3' ෆයිල් එක දාන්න.</li>
+                <li>✍️ <b>Custom Wadan:</b> Garage එකෙන් ඔයාගෙම වදනක් දාගන්න!</li>
+                <li>🔊 <b>Sound:</b> දකුණු පැත්තේ උඩින් Sound Off කරන්න පුලුවන්.</li>
             </ul>
         </div>
         
@@ -145,34 +165,86 @@
             <button onclick="toggleGarage()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2">
                 <span>🛒</span> Garage / Shop
             </button>
+
+            <a href="https://www.facebook.com/share/1DLZicSmUT/" target="_blank" class="block w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm flex items-center justify-center gap-2 no-underline">
+                <span>👍</span> Follow Us on Facebook
+            </a>
         </div>
     </div>
 
-    <div id="garage-modal" class="hidden absolute inset-0 z-40 bg-black/95 flex flex-col items-center justify-center p-6">
-        <h2 class="text-3xl text-yellow-400 font-black mb-4 font-tech">GARAGE</h2>
-        <p class="text-gray-400 mb-4">Total Pickups: <span id="total-coins" class="text-white font-bold">0</span></p>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <button onclick="selectColor(0xDC2626, 0)" class="p-4 bg-red-600 rounded-xl border-2 border-white hover:opacity-80">Red (Free)</button>
-            <button onclick="selectColor(0x2563EB, 50)" class="p-4 bg-blue-600 rounded-xl border-2 border-gray-600 hover:opacity-80">Blue (50 Pickups)</button>
-            <button onclick="selectColor(0x10B981, 100)" class="p-4 bg-green-500 rounded-xl border-2 border-gray-600 hover:opacity-80">Neon Green (100)</button>
-            <button onclick="selectColor(0xFFD700, 200)" class="p-4 bg-yellow-500 rounded-xl border-2 border-gray-600 hover:opacity-80">Golden (200)</button>
+    <div id="garage-modal" class="hidden absolute inset-0 z-40 bg-black/95 flex flex-col items-center justify-center p-6 overflow-y-auto">
+        <h2 class="text-3xl text-yellow-400 font-black mb-2 font-tech">GARAGE</h2>
+        <p class="text-gray-400 mb-4">Balance: <span id="total-coins" class="text-white font-bold text-xl">0</span> Passengers</p>
+        
+        <div class="w-full max-w-md space-y-4">
+            <div class="bg-gray-800 p-3 rounded-xl border border-yellow-600/50">
+                <h3 class="text-yellow-400 font-bold mb-2 text-sm uppercase">✍️ Custom Wadan (Cost: 300)</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="custom-wadan-input" placeholder="Enter text (Max 10 chars)" maxlength="10" 
+                           class="flex-1 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-white text-sm">
+                    <button onclick="buyCustomWadan()" class="bg-yellow-600 hover:bg-yellow-500 text-white font-bold px-4 py-2 rounded text-sm">BUY</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-white font-bold mb-2 border-b border-gray-700">📜 Standard Stickers</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="selectWadan('වදන් නෑ', 0)" class="p-2 bg-gray-800 rounded border border-gray-600 text-xs text-white">වදන් නෑ (Free)</button>
+                    <button onclick="selectWadan('සුද්ද', 20)" class="p-2 bg-gray-800 rounded border border-gray-600 text-xs text-white">සුද්ද (20)</button>
+                    <button onclick="selectWadan('සයිලන්සර්', 50)" class="p-2 bg-gray-800 rounded border border-gray-600 text-xs text-white">සයිලන්සර් (50)</button>
+                    <button onclick="selectWadan('හිතුමතේ', 100)" class="p-2 bg-gray-800 rounded border border-gray-600 text-xs text-white">හිතුමතේ (100)</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-white font-bold mb-2 border-b border-gray-700">🎨 Paint Job</h3>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="selectColor(0xDC2626, 0)" class="h-12 bg-red-600 rounded border-2 border-white"></button>
+                    <button onclick="selectColor(0x2563EB, 50)" class="h-12 bg-blue-600 rounded border-2 border-gray-600 relative"><span class="absolute text-[8px] bg-black text-white px-1 bottom-0 right-0">50</span></button>
+                    <button onclick="selectColor(0x10B981, 100)" class="h-12 bg-green-500 rounded border-2 border-gray-600 relative"><span class="absolute text-[8px] bg-black text-white px-1 bottom-0 right-0">100</span></button>
+                    <button onclick="selectColor(0xFFD700, 200)" class="h-12 bg-yellow-500 rounded border-2 border-gray-600 relative"><span class="absolute text-[8px] bg-black text-white px-1 bottom-0 right-0">200</span></button>
+                </div>
+            </div>
         </div>
-        <button onclick="toggleGarage()" class="bg-gray-600 px-8 py-3 rounded-xl font-bold text-white">CLOSE ❌</button>
+        <button onclick="toggleGarage()" class="bg-gray-600 px-8 py-3 rounded-xl font-bold text-white w-full max-w-md mt-4">CLOSE ❌</button>
     </div>
 
     <div id="game-over-screen" class="hidden absolute inset-0 z-30 flex flex-col bg-black/95 backdrop-blur-md p-4 overflow-hidden">
         <div class="flex-grow flex flex-col items-center justify-center overflow-y-auto py-4">
-            <h2 class="text-5xl font-black text-red-600 mb-2 italic font-tech mt-4">WASTED!</h2>
+            <h2 class="text-4xl font-black text-red-600 mb-4 italic font-tech animate-pulse">WASTED!</h2>
             
-            <div class="bg-gray-900 p-4 rounded-2xl w-full max-w-sm border border-gray-800 shadow-2xl mb-4 shrink-0">
-                <p class="text-xs text-gray-500 uppercase mb-1">Your Rank</p>
-                <h3 id="funny-badge" class="text-xl font-black text-yellow-400 mb-2 animate-pulse">???</h3>
-                <div class="flex justify-between text-sm text-gray-400 border-t border-gray-800 pt-2">
-                    <span>Score:</span>
-                    <span id="final-score" class="font-bold text-white text-xl">0</span>
+            <div class="license-card w-full max-w-sm mb-6 text-black">
+                <div class="license-header">
+                    <h3 class="text-lg font-bold font-tech text-yellow-500">TUK RUSH DRIVER LICENSE</h3>
+                    <p class="text-[10px] text-gray-400">DEPARTMENT OF MOTOR TRAFFIC - SRI LANKA</p>
                 </div>
-                <p id="upload-status" class="text-xs text-blue-400 mt-1 animate-pulse">Checking Database...</p>
+                <div class="p-4 grid grid-cols-3 gap-2">
+                    <div class="col-span-1 bg-gray-300 h-24 rounded flex items-center justify-center border border-gray-400">
+                        <span class="text-3xl">👤</span>
+                    </div>
+                    <div class="col-span-2 space-y-1">
+                        <div class="flex justify-between border-b border-gray-400 pb-1">
+                            <span class="text-xs font-bold text-gray-600">NAME:</span>
+                            <span id="card-name" class="text-sm font-bold uppercase">---</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-400 pb-1">
+                            <span class="text-xs font-bold text-gray-600">STICKER:</span>
+                            <span id="card-wadan" class="text-sm font-bold text-red-600">---</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-400 pb-1">
+                            <span class="text-xs font-bold text-gray-600">SCORE:</span>
+                            <span id="final-score" class="text-sm font-black text-blue-800">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-200 p-2 text-center border-t border-gray-400">
+                    <p class="text-[10px] text-gray-500 uppercase">Class Of Vehicle</p>
+                    <h3 id="funny-badge" class="text-lg font-black text-black">---</h3>
+                </div>
+                <div class="stamp">EXPIRED</div>
             </div>
+
+            <p id="upload-status" class="text-xs text-blue-400 mt-1 mb-4">Checking Database...</p>
 
             <div class="bg-gray-800 w-full max-w-sm rounded-xl p-3 mb-2 border border-gray-700 shrink-0">
                 <h4 class="text-yellow-400 font-bold text-sm uppercase mb-2 border-b border-gray-600 pb-1">🏆 Top Legends</h4>
@@ -183,14 +255,14 @@
         </div>
 
         <div class="w-full max-w-sm mx-auto flex flex-col gap-2 pb-4 pt-2 bg-black/0 z-50">
-            <button onclick="shareScore()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm">
-                <span>📲</span> යාලුවන්ටත් කියමු
-            </button>
             <a href="https://www.facebook.com/share/1DLZicSmUT/" target="_blank" class="bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 no-underline text-sm">
-                <span>👍</span> Page එක ෆලෝ කරන්න
+                <span>👍</span> Visit Facebook Page
             </a>
+            <button onclick="shareScore()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm">
+                <span>📸</span> Share License
+            </button>
             <button onclick="window.location.reload()" class="bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm">
-                <span>🔄</span> ආපහු යමු
+                <span>🔄</span> Try Again
             </button>
         </div>
     </div>
@@ -238,6 +310,15 @@
             document.getElementById('btn-text').classList.add('hidden');
             document.getElementById('btn-loader').classList.remove('hidden');
 
+            // --- AUDIO TRIGGER FIX ---
+            // We ensure audio is unlocked on the first button click
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    document.getElementById('loading-msg').style.display = 'block';
+                    setTimeout(() => document.getElementById('loading-msg').style.display = 'none', 3000);
+                }).catch(e => console.log("Audio waiting..."));
+            }
+
             if(inputName === localStorage.getItem('tukPlayerName')) {
                 startGameSuccess(inputName);
                 return;
@@ -246,7 +327,6 @@
             try {
                 const docRef = doc(db, "scores", inputName);
                 const docSnap = await getDoc(docRef);
-
                 if (docSnap.exists()) {
                     document.getElementById('btn-text').classList.remove('hidden');
                     document.getElementById('btn-loader').classList.add('hidden');
@@ -317,46 +397,67 @@
     <script>
         const CONFIG = { laneWidth: 14, startSpeed: 0.6, maxGap: 30, enemySpeed: 0.012 };
         const BUS_NAMES = ["මාර සෙනග", "කැලේ රජා", "හෝල්ට් නෑ", "කුඩු එක්ස්ප්‍රස්", "නයිට් රයිඩර්", "අවතාරේ", "සොනික්"];
-        const BUS_SHOUTS = ["අඩෝ අයින් කරපන්!", "පාර මගේ යකෝ!", "ඔහොම යමන්!", "තෝ කොහෙද යන්නේ?", "පලයන් අයින් වෙලා!", "මගෙන් කන්නද හදන්නේ?"];
+        const BUS_SHOUTS = ["අඩෝ අයින් කරපන්!", "පාර මගේ යකෝ!", "ඔහොම යමන්!", "තෝ කොහෙද යන්නේ!", "පලයන් අයින් වෙලා!", "මගෙන් කන්නද හදන්නේ?"];
         const CRASH_SHOUTS = ["අයියෝ සල්ලි!", "කොහෙද යකෝ ගියේ!", "වාහනේ ඉවරයි!", "අම්මෝ!", "කෙල වුනා නේද?", "සොරි ඩොට් කොම්"];
+
+        // --- AUDIO SYSTEM ---
+        // !!! IMPORTANT !!!
+        // You MUST upload a file named "audio.mp3" to the same folder as this HTML file.
+        const SONG_FILE = "audio.mp3"; 
+        
+        let bgMusic = new Audio(SONG_FILE);
+        bgMusic.loop = true; 
+        bgMusic.volume = 1.0; // Max volume
+        let isMuted = false;
+
+        // Error handling if file is missing
+        bgMusic.onerror = function() {
+            alert("සින්දුව හොයාගන්න බෑ! ෆයිල් එකේ නම audio.mp3 ද? එකම ෆෝල්ඩර් එකේද දැම්මේ?");
+        };
+
+        window.toggleSound = function() {
+            isMuted = !isMuted;
+            bgMusic.muted = isMuted;
+            const btn = document.getElementById('mute-btn');
+            btn.innerText = isMuted ? "🔇" : "🔊";
+            btn.style.backgroundColor = isMuted ? "rgba(255,0,0,0.5)" : "rgba(255,255,255,0.2)";
+        };
+
+        function stopBusMusic() { bgMusic.pause(); bgMusic.currentTime = 0; }
 
         let state = { 
             isPlaying: false, score: 0, passengers: 0, gap: 20, speedMultiplier: 1.0, 
             frame: 0, playerName: "Rider", entities: [], 
             playerColor: parseInt(localStorage.getItem('tukColor')) || 0xDC2626,
+            playerWadan: localStorage.getItem('tukWadan') || "වදන් නෑ",
             isDay: false
         };
         let animationId;
 
-        // --- SHOW VISUAL SHOUT (SIDES ONLY) ---
+        // Visual Effects
         function showVisualShout(text, type) {
             const container = document.getElementById('shout-container');
             const bubble = document.createElement('div');
             bubble.className = `shout-bubble ${type === 'player' ? 'shout-player' : ''}`;
             bubble.innerText = text;
-            
             if (type !== 'player') {
                 const isLeft = Math.random() > 0.5;
                 bubble.style.left = isLeft ? Math.random()*10 + 2 + '%' : Math.random()*10 + 80 + '%';
                 bubble.style.top = Math.random() * 50 + 10 + '%';
                 bubble.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
             }
-
-            container.appendChild(bubble);
-            setTimeout(() => bubble.remove(), 2500); 
+            container.appendChild(bubble); setTimeout(() => bubble.remove(), 2500); 
         }
 
         function showPickupAnim() {
             const container = document.getElementById('shout-container');
-            const txt = document.createElement('div');
-            txt.className = 'pickup-anim';
-            txt.innerText = "+1 Passenger";
-            txt.style.left = '50%'; txt.style.top = '60%';
+            const txt = document.createElement('div'); txt.className = 'pickup-anim';
+            txt.innerText = "+1 Passenger"; txt.style.left = '50%'; txt.style.top = '60%';
             txt.style.transform = 'translate(-50%, -50%)';
-            container.appendChild(txt);
-            setTimeout(()=>txt.remove(), 800);
+            container.appendChild(txt); setTimeout(()=>txt.remove(), 800);
         }
 
+        // Three.js Setup
         const scene = new THREE.Scene(); scene.background = new THREE.Color(0x050505); scene.fog = new THREE.Fog(0x050505, 10, 100);
         const mainCamera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         mainCamera.position.set(0, 6, 14); mainCamera.lookAt(0, 0, -10);
@@ -379,52 +480,41 @@
             mesh.position.set(x, y, z); mesh.castShadow = true; if(parent) parent.add(mesh); return mesh;
         }
 
-        function createNameTexture(name) {
-            const cvs = document.createElement('canvas'); cvs.width=256; cvs.height=64;
-            const ctx = cvs.getContext('2d'); ctx.fillStyle="rgba(0,0,0,0)"; ctx.fillRect(0,0,256,64);
-            ctx.shadowColor="black"; ctx.shadowBlur=4; ctx.fillStyle="#FFD700"; ctx.font="bold 30px Arial"; 
-            ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(name, 128, 32);
+        function createTextTexture(text, bgColor, txtColor, w, h) {
+            const cvs = document.createElement('canvas'); cvs.width=w; cvs.height=h;
+            const ctx = cvs.getContext('2d'); 
+            if(bgColor) { ctx.fillStyle=bgColor; ctx.fillRect(0,0,w,h); }
+            else { ctx.clearRect(0,0,w,h); }
+            ctx.fillStyle=txtColor; ctx.font="bold 40px Arial"; ctx.textAlign="center"; ctx.textBaseline="middle"; 
+            ctx.fillText(text, w/2, h/2);
             return new THREE.CanvasTexture(cvs);
         }
 
-        // --- WEIRD BUILDINGS (SCENERY) ---
         function createWeirdBuilding() {
             const type = Math.floor(Math.random() * 3);
-            let geo, mat;
-            const col = Math.random() * 0xffffff;
-            
-            if(type === 0) geo = new THREE.CylinderGeometry(0, 4, 15, 4); // Pyramid
-            else if(type === 1) geo = new THREE.TorusKnotGeometry(3, 1, 64, 8); // Twisted
-            else geo = new THREE.BoxGeometry(4, 20, 4); // Tall Tower
-
+            let geo, mat; const col = Math.random() * 0xffffff;
+            if(type === 0) geo = new THREE.CylinderGeometry(0, 4, 15, 4); 
+            else if(type === 1) geo = new THREE.TorusKnotGeometry(3, 1, 64, 8); 
+            else geo = new THREE.BoxGeometry(4, 20, 4); 
             mat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.3 });
-            const mesh = new THREE.Mesh(geo, mat);
-            return mesh;
+            return new THREE.Mesh(geo, mat);
         }
 
         function createPrivateBus() {
             const group = new THREE.Group();
             const col = [0x8A2BE2, 0x0000FF, 0xFF1493, 0x00FF00][Math.floor(Math.random()*4)];
             createBox(3.4, 3.8, 10, col, 0, 1.9, 0, group);
-            const win = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.2, 0.2), new THREE.MeshStandardMaterial({color:0x111111, roughness: 0.1}));
+            const win = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.2, 0.2), new THREE.MeshStandardMaterial({color:0x111111}));
             win.position.set(0, 2.6, 5.1); group.add(win);
-            const grill = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.8, 0.2), new THREE.MeshStandardMaterial({color:0x333333}));
-            grill.position.set(0, 1.2, 5.1); group.add(grill);
-            const bumper = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.5, 0.5), new THREE.MeshStandardMaterial({color:0x222222}));
-            bumper.position.set(0, 0.4, 5.2); group.add(bumper);
-            const sideWin = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.5, 8), new THREE.MeshStandardMaterial({color:0x000000}));
-            sideWin.position.set(0, 2.5, 0); group.add(sideWin);
-            const lGeo = new THREE.BoxGeometry(0.4, 0.4, 0.1); const lMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            [-1.2, 1.2].forEach(x => { const l1 = new THREE.Mesh(lGeo, lMat.clone()); l1.position.set(x, 0.9, 5.25); group.add(l1); });
             const randName = BUS_NAMES[Math.floor(Math.random() * BUS_NAMES.length)];
-            const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({ map: createNameTexture(randName), transparent: true }));
+            const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({ map: createTextTexture(randName, null, '#FFD700', 256, 64), transparent: true }));
             nameMesh.position.set(0, 4.2, 0); group.add(nameMesh);
             group.userData = { type: 'bus', busName: randName };
             return group;
         }
 
         let playerTuk;
-        function createTuk(color, isHelago) {
+        function createTuk(color, isHelago, wadanText) {
             const group = new THREE.Group();
             createBox(1.5, 0.6, 2.8, color, 0, 0.6, 0, group); 
             createBox(1.4, 1.4, 1.4, color, 0, 1.4, 0.6, group); 
@@ -432,18 +522,25 @@
             const roof = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 3.4), new THREE.MeshStandardMaterial({ color: 0x111111 }));
             roof.position.set(0, 2.4, 0.1); group.add(roof);
             if(isHelago) {
-                const cvs = document.createElement('canvas'); cvs.width=128; cvs.height=64;
-                const ctx = cvs.getContext('2d'); ctx.fillStyle='#00A651'; ctx.fillRect(0,0,128,64);
-                ctx.fillStyle='white'; ctx.font='bold 24px Arial'; ctx.fillText('HELAGO', 15, 40);
-                const sign = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.1), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cvs)}));
+                const sign = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.1), new THREE.MeshBasicMaterial({map: createTextTexture('HELAGO', '#00A651', 'white', 128, 64)}));
                 sign.position.set(0, 2.8, 0); group.add(sign);
                 const glow = new THREE.PointLight(0x00ff00, 1, 10); glow.position.set(0, 2, 0); group.add(glow);
+            } else if (wadanText && wadanText !== "වදන් නෑ") {
+                const stickerGeo = new THREE.PlaneGeometry(1.6, 0.5); 
+                const stickerMat = new THREE.MeshBasicMaterial({ 
+                    map: createTextTexture(wadanText, 'white', 'black', 256, 64), 
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                const sticker = new THREE.Mesh(stickerGeo, stickerMat);
+                sticker.position.set(0, 1.5, 1.35); 
+                group.add(sticker);
             }
             return group;
         }
 
-        playerTuk = createTuk(state.playerColor, false); scene.add(playerTuk);
-        const enemyTuk = createTuk(0x00A651, true); scene.add(enemyTuk);
+        playerTuk = createTuk(state.playerColor, false, state.playerWadan); scene.add(playerTuk);
+        const enemyTuk = createTuk(0x00A651, true, null); scene.add(enemyTuk);
 
         const road = new THREE.Mesh(new THREE.PlaneGeometry(30, 2000), new THREE.MeshStandardMaterial({ color: 0x222222 }));
         road.rotation.x = -Math.PI/2; road.position.z = -500; road.receiveShadow = true; scene.add(road);
@@ -466,15 +563,53 @@
             let totalC = parseInt(localStorage.getItem('tukCoins') || 0);
             if(totalC >= cost) {
                 if(cost > 0) {
-                    totalC -= cost;
-                    localStorage.setItem('tukCoins', totalC);
+                    totalC -= cost; localStorage.setItem('tukCoins', totalC);
                     document.getElementById('total-coins').innerText = totalC;
                 }
-                state.playerColor = color;
-                localStorage.setItem('tukColor', color);
-                scene.remove(playerTuk); playerTuk = createTuk(color, false); scene.add(playerTuk);
+                state.playerColor = color; localStorage.setItem('tukColor', color);
+                scene.remove(playerTuk); playerTuk = createTuk(color, false, state.playerWadan); scene.add(playerTuk);
                 alert("පැහැය මාරු කළා!");
             } else { alert("මගීන් මදි!"); }
+        };
+
+        window.selectWadan = function(text, cost) {
+            let totalC = parseInt(localStorage.getItem('tukCoins') || 0);
+            if(totalC >= cost) {
+                if(cost > 0) {
+                    totalC -= cost; localStorage.setItem('tukCoins', totalC);
+                    document.getElementById('total-coins').innerText = totalC;
+                }
+                state.playerWadan = text; localStorage.setItem('tukWadan', text);
+                scene.remove(playerTuk); playerTuk = createTuk(state.playerColor, false, text); scene.add(playerTuk);
+                alert("වදන් ගැහුවා: " + text);
+            } else { alert("මගීන් මදි!"); }
+        };
+
+        window.buyCustomWadan = function() {
+            const input = document.getElementById('custom-wadan-input');
+            const text = input.value.trim();
+            const cost = 300;
+            
+            if(!text) { alert("වදනක් ගහන්න!"); return; }
+            if(text.length > 10) { alert("වචන වැඩි! අකුරු 10ට අඩුවෙන් දාන්න."); return; }
+
+            let totalC = parseInt(localStorage.getItem('tukCoins') || 0);
+            if(totalC >= cost) {
+                totalC -= cost; localStorage.setItem('tukCoins', totalC);
+                document.getElementById('total-coins').innerText = totalC;
+                
+                state.playerWadan = text; 
+                localStorage.setItem('tukWadan', text);
+                
+                scene.remove(playerTuk); 
+                playerTuk = createTuk(state.playerColor, false, text); 
+                scene.add(playerTuk);
+                
+                alert("custom වදනක් ගැහුවා: " + text);
+                input.value = "";
+            } else {
+                alert("මගීන් මදි! තව 300ක් ඕන.");
+            }
         };
 
         window.startGameInternal = function() {
@@ -484,55 +619,43 @@
             document.getElementById('game-ui').style.display = 'flex';
             state.score = 0; state.passengers = 0; state.gap = 20; state.frame = 0;
             state.entities.forEach(e => scene.remove(e.mesh)); state.entities = [];
-            state.isDay = false; // Reset to night
+            state.isDay = false; 
             scene.background.setHex(0x050505); scene.fog.color.setHex(0x050505);
-            state.isPlaying = true; animate();
+            state.isPlaying = true; 
+            if(bgMusic.paused && !isMuted) { bgMusic.play(); }
+            animate();
         };
 
         function showSideWarning(text) {
             const container = document.getElementById('warning-container');
             const alert = document.createElement('div'); alert.className = 'bus-alert'; alert.innerHTML = `⚠️ ${text}`;
-            container.appendChild(alert);
-            setTimeout(() => { alert.style.opacity = '0'; setTimeout(() => alert.remove(), 300); }, 2000);
+            container.appendChild(alert); setTimeout(() => { alert.style.opacity = '0'; setTimeout(() => alert.remove(), 300); }, 2000);
         }
 
         function spawnEntity() {
-            const busChance = state.score > 150 ? 0.85 : 1.1; 
-            const rand = Math.random();
-            const x = (Math.random() - 0.5) * CONFIG.laneWidth;
-            const z = -120 - Math.random() * 20;
+            const busChance = state.score > 150 ? 0.85 : 1.1; const rand = Math.random();
+            const x = (Math.random() - 0.5) * CONFIG.laneWidth; const z = -120 - Math.random() * 20;
             let mesh, isPassenger=false, isBus=false, isRock=false, isScenery=false;
 
-            // SCENERY SPAWN (Day Time Only)
             if(state.isDay && Math.random() < 0.15) {
-                isScenery = true;
-                mesh = createWeirdBuilding();
-                // Spawn way off to the side
+                isScenery = true; mesh = createWeirdBuilding();
                 const sideX = (Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 15);
                 mesh.position.set(sideX, 0, z);
             } else {
-                // Regular Spawn
                 if (rand < 0.45) {
                     isPassenger = true;
                     const g = new THREE.Group();
                     const b = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,1.2), new THREE.MeshStandardMaterial({color:0x3B82F6})); b.position.y=0.6;
                     const h = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({color:0xffccaa})); h.position.y=1.3;
-                    g.add(b); g.add(h); mesh = g;
-                    mesh.position.set(x, mesh.position.y||0, z);
+                    g.add(b); g.add(h); mesh = g; mesh.position.set(x, 0, z);
                 } else if (rand > busChance) {
-                    isBus = true; mesh = createPrivateBus(); showSideWarning(mesh.userData.busName);
-                    mesh.position.set(x, mesh.position.y||0, z);
-                    if(Math.random() > 0.6) {
-                        const shout = BUS_SHOUTS[Math.floor(Math.random() * BUS_SHOUTS.length)];
-                        showVisualShout(shout, 'enemy');
-                    }
+                    isBus = true; mesh = createPrivateBus(); showSideWarning(mesh.userData.busName); mesh.position.set(x, 0, z);
+                    if(Math.random() > 0.6) showVisualShout(BUS_SHOUTS[Math.floor(Math.random() * BUS_SHOUTS.length)], 'enemy');
                 } else {
-                    isRock = true;
-                    mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0), new THREE.MeshStandardMaterial({color:0x555555})); mesh.position.y=1.0;
-                    mesh.position.set(x, mesh.position.y||0, z);
+                    isRock = true; mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0), new THREE.MeshStandardMaterial({color:0x555555})); 
+                    mesh.position.set(x, 1.0, z);
                 }
             }
-
             mesh.castShadow = true; scene.add(mesh);
             state.entities.push({ mesh, isPassenger, isBus, isRock, isScenery, isHit: false, velocity: {x:0,y:0,z:0} });
         }
@@ -545,28 +668,25 @@
         }
 
         window.shareScore = function() {
-            const text = `අඩෝ මම ${state.playerName}! Helago එකෙන් බේරිලා "${getBadge(Math.floor(state.score))}" එකක් ගත්තා! ස්කෝර් එක: ${Math.floor(state.score)}.`;
-            if (navigator.share) navigator.share({ title: 'Tuk Rush', text: text, url: window.location.href });
-            else { alert("Link Copied!"); }
+            const text = `Tuk Rush එකේ මගේ රෑන්ක් එක: "${getBadge(Math.floor(state.score))}"! Score: ${Math.floor(state.score)}. වරෙන් රේස් එකක්!`;
+            if (navigator.share) navigator.share({ title: 'Tuk Rush License', text: text, url: window.location.href });
+            else { alert("Screenshot ගහලා යාලුවන්ට යවන්න! (Link Copied)"); }
         };
 
         function gameOver() {
             state.isPlaying = false; cancelAnimationFrame(animationId);
+            stopBusMusic(); 
             document.getElementById('game-ui').classList.add('hidden');
             const goScreen = document.getElementById('game-over-screen');
-            goScreen.classList.remove('hidden');
-            goScreen.style.display = 'flex';
-            
-            const crashLine = CRASH_SHOUTS[Math.floor(Math.random() * CRASH_SHOUTS.length)];
-            showVisualShout(crashLine, 'player');
-
+            goScreen.classList.remove('hidden'); goScreen.style.display = 'flex';
+            showVisualShout(CRASH_SHOUTS[Math.floor(Math.random() * CRASH_SHOUTS.length)], 'player');
             let currentCoins = parseInt(localStorage.getItem('tukCoins') || 0);
             localStorage.setItem('tukCoins', currentCoins + state.passengers);
-
             const finalScore = Math.floor(state.score);
+            document.getElementById('card-name').innerText = state.playerName;
+            document.getElementById('card-wadan').innerText = state.playerWadan;
             document.getElementById('final-score').innerText = finalScore;
             document.getElementById('funny-badge').innerText = getBadge(state.score);
-
             if(window.saveScoreToDB) window.saveScoreToDB(state.playerName, finalScore);
         }
 
@@ -578,32 +698,24 @@
             state.speedMultiplier = 1 + (state.score / 5000);
             const currentSpeed = CONFIG.startSpeed * state.speedMultiplier;
 
-            // DAY/NIGHT CYCLE LOGIC
-            // 0-5000 Night, 5000-10000 Day, 10000-15000 Night...
             const cycle = Math.floor(state.score / 5000);
             const isDayNow = (cycle % 2 !== 0);
-            
             if (state.isDay !== isDayNow) {
                 state.isDay = isDayNow;
                 const timeIcon = document.getElementById('time-indicator');
                 if (isDayNow) {
-                    scene.background.setHex(0x87CEEB); // Sky Blue
-                    scene.fog.color.setHex(0x87CEEB);
-                    dirLight.intensity = 1.0;
-                    timeIcon.innerText = "☀️";
+                    scene.background.setHex(0x87CEEB); scene.fog.color.setHex(0x87CEEB);
+                    dirLight.intensity = 1.0; timeIcon.innerText = "☀️";
                 } else {
-                    scene.background.setHex(0x050505); // Night Black
-                    scene.fog.color.setHex(0x050505);
-                    dirLight.intensity = 0.5;
-                    timeIcon.innerText = "🌙";
+                    scene.background.setHex(0x050505); scene.fog.color.setHex(0x050505);
+                    dirLight.intensity = 0.5; timeIcon.innerText = "🌙";
                 }
             }
 
             playerTuk.position.x += (targetX - playerTuk.position.x) * 0.15;
             playerTuk.rotation.z = (playerTuk.position.x - targetX) * 0.08; 
             playerTuk.rotation.y = -(playerTuk.position.x - targetX) * 0.05; 
-            headLight.position.x = playerTuk.position.x;
-            headLight.target.position.x = playerTuk.position.x * 3;
+            headLight.position.x = playerTuk.position.x; headLight.target.position.x = playerTuk.position.x * 3;
 
             enemyTuk.position.z = state.gap; 
             enemyTuk.position.x += (playerTuk.position.x - enemyTuk.position.x) * 0.05;
@@ -611,7 +723,6 @@
             const spawnRate = Math.max(20, 60 - Math.floor(state.score/150));
             if(state.frame % spawnRate === 0) spawnEntity();
 
-            // PHYSICS LOOP
             for (let i = 0; i < state.entities.length; i++) {
                 const ent = state.entities[i];
                 if(ent.isBus) {
@@ -621,8 +732,7 @@
                             const dx = Math.abs(ent.mesh.position.x - target.mesh.position.x);
                             const dz = Math.abs(ent.mesh.position.z - target.mesh.position.z);
                             if(dz < 4.0 && dx < 2.5) { 
-                                target.isHit = true;
-                                target.velocity = { x: (Math.random() - 0.5) * 2.5, y: 1.8, z: 0 };
+                                target.isHit = true; target.velocity = { x: (Math.random() - 0.5) * 2.5, y: 1.8, z: 0 };
                             }
                         }
                     }
@@ -632,25 +742,14 @@
             for (let i = state.entities.length - 1; i >= 0; i--) {
                 const ent = state.entities[i];
                 let speed = currentSpeed; if(ent.isBus) speed *= 1.5; 
-                
                 if(ent.isHit) {
-                    ent.mesh.position.x += ent.velocity.x;
-                    ent.mesh.position.y += ent.velocity.y;
-                    ent.mesh.rotation.z += 0.5; ent.mesh.rotation.x += 0.2;
-                    ent.velocity.y -= 0.1; 
-                } else {
-                    ent.mesh.position.z += speed;
-                }
-
-                if(!ent.isScenery && ent.isBus && state.frame % 4 === 0 && ent.mesh.userData.lights) {
-                    const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
-                    ent.mesh.userData.lights.forEach(l => l.material.color.setHex(colors[Math.floor(Math.random()*colors.length)]));
-                }
-
+                    ent.mesh.position.x += ent.velocity.x; ent.mesh.position.y += ent.velocity.y;
+                    ent.mesh.rotation.z += 0.5; ent.mesh.rotation.x += 0.2; ent.velocity.y -= 0.1; 
+                } else { ent.mesh.position.z += speed; }
+                
                 if (ent.isScenery) {
-                    // Scenery just moves and dies
                     if(ent.mesh.position.z > 30) { scene.remove(ent.mesh); state.entities.splice(i, 1); }
-                    continue; // Skip collision for scenery
+                    continue;
                 }
 
                 const dx = Math.abs(ent.mesh.position.x - playerTuk.position.x);
@@ -658,9 +757,8 @@
 
                 if (dz < 2.5 && dx < 2.2 && !ent.isHit) {
                     if (ent.isPassenger) {
-                        state.score += 100; state.passengers++; 
+                        state.score += 100; state.passengers++; showPickupAnim();
                         state.gap += 8; if(state.gap>CONFIG.maxGap) state.gap=CONFIG.maxGap;
-                        showPickupAnim();
                         scene.remove(ent.mesh); state.entities.splice(i, 1);
                     } else {
                         if(ent.isBus) state.gap = -10; else { state.gap -= 8; state.score -= 50; }
@@ -681,8 +779,7 @@
             else document.getElementById('mirror-alert').classList.add('hidden');
             if(state.gap <= 2) gameOver();
 
-            renderer.setScissorTest(false);
-            renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+            renderer.setScissorTest(false); renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
             renderer.render(scene, mainCamera);
 
             const mirrorBox = document.getElementById('mirror-box');
@@ -690,8 +787,7 @@
                 const rect = mirrorBox.getBoundingClientRect();
                 const w = rect.width; const h = rect.height; const l = rect.left; const b = window.innerHeight - rect.bottom; 
                 renderer.setScissorTest(true); renderer.setScissor(l, b, w, h); renderer.setViewport(l, b, w, h);
-                mirrorCamera.position.x = playerTuk.position.x;
-                mirrorCamera.lookAt(enemyTuk.position.x, 2, enemyTuk.position.z);
+                mirrorCamera.position.x = playerTuk.position.x; mirrorCamera.lookAt(enemyTuk.position.x, 2, enemyTuk.position.z);
                 renderer.render(scene, mirrorCamera);
             }
         }
@@ -701,4 +797,4 @@
         window.addEventListener('resize', ()=>{ mainCamera.aspect=window.innerWidth/window.innerHeight; mainCamera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     </script>
 </body>
-</html>
+    </html>
